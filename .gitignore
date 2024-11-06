@@ -1,4 +1,9 @@
-# Byte-compiled / optimized / DLL files
+backend/venv/
+backend/.env
+.env
+__pycache__/
+*.pyc
+frontend/node_modules/# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class

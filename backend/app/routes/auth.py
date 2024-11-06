@@ -1,6 +1,6 @@
 # backend/app/routes/auth.py
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, get_jwt
 from datetime import datetime
 from app import db
 from app.models.user import User
@@ -88,6 +88,16 @@ def login():
     }), 200
 
 
+@auth_bp.route('/logout', methods=['POST'])
+@jwt_required()
+def logout():
+    # Invalidate the token by adding it to a blacklist (if implemented)
+    jti = get_jwt()['jti']
+    # Add the token to the blacklist (implementation depends on your setup)
+    # For now, we'll just return success as the frontend will handle token removal
+    return jsonify({'message': 'Logged out successfully'}), 200
+
+
 @auth_bp.route('/me', methods=['GET'])
 @jwt_required()
 def get_current_user():
@@ -125,15 +135,3 @@ def validate_email():
 
     email_exists = User.get_by_email(email) is not None
     return jsonify({'available': not email_exists})
-
-
-# Optional: Logout endpoint (backend side)
-@auth_bp.route('/logout', methods=['POST'])
-@jwt_required()
-def logout():
-    # TODO: Check this again before submission
-    # In a more complete implementation, you might want to:
-    # 1. Add the token to a blacklist
-    # 2. Clear any server-side sessions
-    # For now, we'll just return success as the frontend will handle token removal
-    return jsonify({'message': 'Logged out successfully'}), 200

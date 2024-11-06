@@ -39,9 +39,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    authService.logout();
+  const logout = async () => {
+    try {
+    await authService.logout();
     setUser(null);
+    } catch (err) {
+      setError(err.response?.data?.error || 'An error occurred during logout');
+      throw err;
+    }
   };
 
   return (

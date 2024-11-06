@@ -8,10 +8,11 @@ from .config import Config
 db = SQLAlchemy()
 jwt = JWTManager()
 
+
 def create_app(config_class=Config):
     # Create Flask application instance
     app = Flask(__name__)
-    
+
     # Load configuration from the specified class
     app.config.from_object(config_class)
 
@@ -22,7 +23,9 @@ def create_app(config_class=Config):
 
     # Register blueprints (we'll create these later)
     from .routes.auth import auth_bp
+    from .routes.todos import todos_bp
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(todos_bp, url_prefix='/api/todos')
 
     # Create database tables within the application context
     with app.app_context():

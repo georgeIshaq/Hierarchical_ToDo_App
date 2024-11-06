@@ -32,9 +32,17 @@ const authService = {
     return response.data;
   },
 
-  logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  async logout() {
+    const token = localStorage.getItem('token');
+    if (token) {
+      await axios.post(`${API_URL}/auth/logout`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
   },
 
   getCurrentUser() {

@@ -2,7 +2,7 @@
 export default {
   content: [
     "./index.html",
-    "./src/components/auth/Login.jsx"],
+    "./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {},
   },

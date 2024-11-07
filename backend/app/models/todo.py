@@ -56,3 +56,8 @@ class TodoItem(db.Model):
             'parent_id': self.parent_id,
             'children': [child.to_dict() for child in self.children],
         }
+
+    def update_completion(self, completed):
+        self.completed = completed
+        for child in self.children:
+            child.update_completion(completed)

@@ -1,3 +1,5 @@
+// frontend/src/App.jsx
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import Login from './components/auth/Login';
@@ -17,6 +19,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
+          {/* Redirect /home to /lists */}
+          <Route path="/home" element={<Navigate to="/lists" replace />} />
+
           {/* Protected Routes */}
           <Route
             path="/lists"
@@ -34,23 +39,13 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/home"
-            element={
-              <ProtectedRoute>
-                <TodoListsPage />
-              </ProtectedRoute>
-            }
-          />
 
-          {/* Redirect root to login */}
+          {/* Redirect root and unknown routes to login */}
           <Route path="/" element={<Navigate to="/login" replace />} />
-          
-          {/* Catch all other routes and redirect to login */}
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </AuthProvider>
-    </Router>
+      </Router>
   );
 }
 

@@ -107,21 +107,32 @@ const todoService = {
     );
     return response.data;
   },
-  // frontend/src/services/todoService.js
 
-    // Create a new sub-item
-    async createSubItem(parentItemId, title, description = '') {
-        const response = await axios.post(
-        `${API_URL}/todos/items/${parentItemId}/subitems`,
-        { title, description },
-        {
-            headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-        }
-        );
-        return response.data;
-    }
+  // Create a new sub-item
+  async createSubItem(parentItemId, title, description = '') {
+      const response = await axios.post(
+      `${API_URL}/todos/items/${parentItemId}/subitems`,
+      { title, description },
+      {
+          headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+      }
+      );
+      return response.data;
+  },
+  // Move an item to a different list
+  async moveItem(itemId, newListId) {
+    await axios.post(
+      `${API_URL}/todos/items/${itemId}/move`,
+      { list_id: newListId },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      }
+    );
+  },
 };
 
 

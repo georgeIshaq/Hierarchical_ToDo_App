@@ -1,13 +1,17 @@
+// frontend/src/components/todos/TodoListsPage.jsx
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import todoService from '../../services/todoService';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 const TodoListsPage = () => {
   const [lists, setLists] = useState([]);
   const [newListTitle, setNewListTitle] = useState('');
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [expandedItems, setExpandedItems] = useState({}); // Track expanded items
 
   useEffect(() => {
     fetchLists();
@@ -24,6 +28,7 @@ const TodoListsPage = () => {
   };
 
   const createList = async () => {
+    if (!newListTitle.trim()) return;
     try {
       const newList = await todoService.createList(newListTitle);
       setLists((prevLists) => [...prevLists, newList]);
@@ -46,50 +51,262 @@ const TodoListsPage = () => {
     navigate(`/lists/${listId}`);
   };
 
-  return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Todo Lists</h1>
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="New List Title"
-          value={newListTitle}
-          onChange={(e) => setNewListTitle(e.target.value)}
-          className="border p-2 mr-2"
-        />
-        <button onClick={createList} className="bg-blue-500 text-white p-2">
-          Create List
-        </button>
-      </div>
-      <div className="flex overflow-x-auto space-x-4">
-        {lists && lists.length > 0 ? (
-          lists.map((list) => (
-            <div key={list.id} className="bg-white shadow-md rounded-lg p-4 w-64 flex-shrink-0">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold" onClick={() => navigateToList(list.id)}>{list.title}</h3>
-                <button onClick={() => deleteList(list.id)} className="bg-red-500 text-white p-2 rounded">
-                  Delete
-                </button>
-              </div>
-              <p className="mb-4">{list.description}</p>
-              <ul>
-                {list.items && list.items.length > 0 ? (
-                  list.items.map((item) => (
-                    <li key={item.id} className="border p-2 mb-2 rounded">
+  const toggleExpandItem = (itemId) => {
+    setExpandedItems((prev) => ({
+      ...prev,
+      [itemId]: !prev[itemId],
+    }));
+  };
+
+  const onDragEnd = async (result) => {
+    const { source, destination, draggableId } = result;
+
+    // Dropped outside any list
+    if (!destination) return;
+
+    // Dropped in the same place
+    if (
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
+    ) {
+      return;
+    }
+
+    const sourceListId = parseInt(source.droppableId);
+    const destListId = parseInt(destination.droppableId);
+    const itemId = parseInt(draggableId);
+
+    try {
+      await todoService.moveItem(itemId, destListId);
+      fetchLists(); // Refresh lists to reflect changes
+    } catch (error) {
+      console.error('Error moving item:', error);
+    }
+  };
+
+  // Recursive component to render items and their sub-items
+  const RenderTasks = ({ items, listId, depth = 0 }) => {
+    return (
+      <ul className={`ml-${depth * 4} mt-2`}>
+        {items.map((item, index) => {
+          const hasChildren = item.children && item.children.length > 0;
+          const isExpanded = expandedItems[item.id];
+
+          return (
+            <Draggable key={item.id} draggableId={item.id.toString()} index={index}>
+              {(provided) => (
+                <li
+                  ref={provided.innerRef}
+                  {...provided.draggableProps}
+                  {...provided.dragHandleProps}
+                  className="bg-gray-50 p-3 mb-3 rounded-lg shadow-sm flex items-center justify-between cursor-move"
+                >
+                  <div className="flex items-center">
+                    {hasChildren && (
+                      <button
+                        onClick={() => toggleExpandItem(item.id)}
+                        className="mr-2 text-gray-600 focus:outline-none"
+                        title="Toggle Sub-Items"
+                      >
+                        {isExpanded ? '▼' : '▶'}
+                      </button>
+                    )}
+                    <span className={`text-gray-800 ${item.completed ? 'line-through' : ''}`}>
                       {item.title}
-                    </li>
-                  ))
-                ) : (
-                  <p>No items available</p>
-                )}
-              </ul>
-            </div>
-          ))
-        ) : (
-          <p>No lists available</p>
-        )}
+                    </span>
+                  </div>
+                  {/* Additional actions can be added here */}
+                  {/* Render sub-items if expanded */}
+                  {hasChildren && isExpanded && (
+                    <div className="mt-1 ml-6">
+                      <RenderTasks
+                        items={items.filter((subItem) => subItem.parent_id === item.id)}
+                        listId={listId}
+                        depth={depth + 1}
+                      />
+                    </div>
+                  )}
+                </li>
+              )}
+            </Draggable>
+          );
+        })}
+        {/* Removed provided.placeholder from here */}
+      </ul>
+    );
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto p-6 bg-white rounded-xl shadow-lg">
+        <h1 className="text-4xl font-bold text-gray-800 mb-6">Your Todo Lists</h1>
+        <div className="flex items-center mb-6">
+          <input
+            type="text"
+            placeholder="New List Title"
+            value={newListTitle}
+            onChange={(e) => setNewListTitle(e.target.value)}
+            className="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+          <button
+            onClick={createList}
+            className="ml-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-200"
+          >
+            Create List
+          </button>
+        </div>
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div className="flex space-x-6 overflow-x-auto pb-4">
+            {lists && lists.length > 0 ? (
+              lists.map((list) => (
+                <Droppable key={list.id} droppableId={list.id.toString()}>
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className="bg-white w-72 h-96 rounded-xl shadow-lg p-6 flex-shrink-0 flex flex-col"
+                    >
+                      <div className="flex justify-between items-center mb-4">
+                        <h3
+                          className="text-xl font-semibold text-gray-700 cursor-pointer flex-grow"
+                          onClick={() => navigateToList(list.id)}
+                        >
+                          {list.title}
+                        </h3>
+                        <button
+                          onClick={() => deleteList(list.id)}
+                          className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow"
+                          title="Delete List"
+                        >
+                          &times;
+                        </button>
+                      </div>
+                      <p className="text-gray-500 mb-4 flex-grow">{list.description}</p>
+                      <div className="flex-grow overflow-y-auto">
+                        {list.items && list.items.length > 0 ? (
+                          list.items
+                            .filter((item) => item.parent_id === null) // Display only top-level items
+                            .map((item, index) => {
+                              const hasChildren = list.items.some((subItem) => subItem.parent_id === item.id);
+                              const isExpanded = expandedItems[item.id];
+
+                              return (
+                                <Draggable key={item.id} draggableId={item.id.toString()} index={index}>
+                                  {(provided) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                      className="bg-gray-50 p-3 mb-3 rounded-lg shadow-sm flex items-center justify-between cursor-move"
+                                    >
+                                      <div className="flex items-center">
+                                        {hasChildren && (
+                                          <button
+                                            onClick={() => toggleExpandItem(item.id)}
+                                            className="mr-2 text-gray-600 focus:outline-none"
+                                            title="Toggle Sub-Items"
+                                          >
+                                            {isExpanded ? '▼' : '▶'}
+                                          </button>
+                                        )}
+                                        <span className={`text-gray-800 ${item.completed ? 'line-through' : ''}`}>
+                                          {item.title}
+                                        </span>
+                                      </div>
+                                      {/* Additional actions can be added here */}
+                                      {/* Render sub-items if expanded */}
+                                      {hasChildren && isExpanded && (
+                                        <div className="mt-1 ml-6">
+                                          <RenderTasks
+                                            items={list.items.filter((subItem) => subItem.parent_id === item.id)}
+                                            listId={list.id}
+                                            depth={1}
+                                          />
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </Draggable>
+                              );
+                            })
+                        ) : (
+                          <p className="text-gray-400">No tasks available</p>
+                        )}
+                        {provided.placeholder}
+                      </div>
+                    </div>
+                  )}
+                </Droppable>
+              ))
+            ) : (
+              <div className="flex-grow flex items-center justify-center">
+                <p className="text-gray-500">No lists available. Create one!</p>
+              </div>
+            )}
+          </div>
+        </DragDropContext>
       </div>
     </div>
+  );
+};
+
+// Recursive component to render sub-items
+const RenderTasks = ({ items, listId, depth }) => {
+  const [expandedItems, setExpandedItems] = useState({});
+
+  const toggleExpandItem = (itemId) => {
+    setExpandedItems((prev) => ({
+      ...prev,
+      [itemId]: !prev[itemId],
+    }));
+  };
+
+  return (
+    <ul className={`ml-${depth * 4} mt-2`}>
+      {items.map((item, index) => {
+        const hasChildren = item.children && item.children.length > 0;
+        const isExpanded = expandedItems[item.id];
+
+        return (
+          <Draggable key={item.id} draggableId={item.id.toString()} index={index}>
+            {(provided) => (
+              <li
+                ref={provided.innerRef}
+                {...provided.draggableProps}
+                {...provided.dragHandleProps}
+                className="bg-gray-100 p-2 mb-2 rounded-lg shadow-sm flex items-center justify-between cursor-move"
+              >
+                <div className="flex items-center">
+                  {hasChildren && (
+                    <button
+                      onClick={() => toggleExpandItem(item.id)}
+                      className="mr-2 text-gray-600 focus:outline-none"
+                      title="Toggle Sub-Items"
+                    >
+                      {isExpanded ? '▼' : '▶'}
+                    </button>
+                  )}
+                  <span className={`text-gray-700 ${item.completed ? 'line-through' : ''}`}>
+                    {item.title}
+                  </span>
+                </div>
+                {/* Render sub-items if expanded */}
+                {hasChildren && isExpanded && (
+                  <div className="mt-1 ml-6">
+                    <RenderTasks
+                      items={items.filter((subItem) => subItem.parent_id === item.id)}
+                      listId={listId}
+                      depth={depth + 1}
+                    />
+                  </div>
+                )}
+              </li>
+            )}
+          </Draggable>
+        );
+      })}
+     
+    </ul>
   );
 };
 

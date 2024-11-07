@@ -107,6 +107,23 @@ const todoService = {
     );
     return response.data;
   },
+  // frontend/src/services/todoService.js
+
+    // Create a new sub-item
+    async createSubItem(parentItemId, title, description = '') {
+        const response = await axios.post(
+        `${API_URL}/todos/items/${parentItemId}/subitems`,
+        { title, description },
+        {
+            headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+        }
+        );
+        return response.data;
+    }
 };
+
+
 
 export default todoService;

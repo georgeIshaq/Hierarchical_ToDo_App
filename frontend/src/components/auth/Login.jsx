@@ -18,7 +18,7 @@ const Login = () => {
       setError('');
       setLoading(true);
       await login(username, password);
-      const from = location.state?.from?.pathname || '/';
+      const from = location.state?.from?.pathname || '/lists';
       navigate(from);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to login');

@@ -23,7 +23,8 @@ class TodoList(db.Model):
             'title': self.title,
             'description': self.description,
             'created_at': self.created_at.isoformat(),
-            'updated_at': self.updated_at.isoformat()
+            'updated_at': self.updated_at.isoformat(),
+            'items': [item.to_dict() for item in self.items],
         }
 
 
@@ -52,5 +53,6 @@ class TodoItem(db.Model):
             'completed': self.completed,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat(),
-            'parent_id': self.parent_id
+            'parent_id': self.parent_id,
+            'children': [child.to_dict() for child in self.children],
         }

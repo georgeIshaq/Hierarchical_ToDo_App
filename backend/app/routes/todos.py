@@ -85,3 +85,22 @@ def create_item(list_id):
     db.session.add(item)
     db.session.commit()
     return jsonify(item.to_dict()), 201
+
+# backend/app/routes/todos.py
+
+@todos_bp.route('/items/<int:item_id>/subitems', methods=['POST'])
+@jwt_required()
+def create_subitem(item_id):
+    parent_item = TodoItem.query.get_or_404(item_id)
+    if parent_item.list.owner_id != g.user.id:
+        return jsonify({'error': 'Unauthorized access'}), 403
+    data = request.get_json()
+    subitem = TodoItem(
+        title=data['title'],
+        description=data.get('description', ''),
+        list_id=parent_item.list_id,
+        parent_id=parent_item.id
+    )
+    db.session.add(subitem)
+    db.session.commit()
+    return jsonify(subitem.to_dict()), 201

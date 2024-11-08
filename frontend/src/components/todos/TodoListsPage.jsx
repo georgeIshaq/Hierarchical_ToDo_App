@@ -168,18 +168,26 @@ const TodoListsPage = () => {
                     >
                       <div className="flex justify-between items-center mb-4">
                         <h3
-                          className="text-xl font-semibold text-gray-700 cursor-pointer flex-grow"
-                          onClick={() => navigateToList(list.id)}
+                          className="text-xl font-semibold text-gray-700  flex-grow"
                         >
                           {list.title}
                         </h3>
-                        <button
-                          onClick={() => deleteList(list.id)}
-                          className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow"
-                          title="Delete List"
-                        >
-                          &times;
-                        </button>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => navigateToList(list.id)}
+                            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow"
+                            title="Edit List"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => deleteList(list.id)}
+                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md shadow"
+                            title="Delete List"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
                       <p className="text-gray-500 mb-4 flex-grow">{list.description}</p>
                       <div className="flex-grow overflow-y-auto">

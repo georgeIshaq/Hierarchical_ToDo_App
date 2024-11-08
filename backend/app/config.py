@@ -12,8 +12,8 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # JWT
-    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'your-secret-key')  # TODO: Change for submission
+    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'your-secret-key')  # Dummy secret key
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
 
     # Security
-    SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key')  # TODO: Change for submission
+    SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key')  # Dummy secret key

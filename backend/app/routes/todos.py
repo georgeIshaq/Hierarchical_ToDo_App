@@ -5,10 +5,11 @@ from app.models.user import User
 from app import db
 from flask_cors import cross_origin
 
-
+# Create a Blueprint for the todos routes
 todos_bp = Blueprint('todos', __name__)
 
 
+# Before each request, ensure the user is authenticated
 @todos_bp.before_request
 def before_request():
     if request.method != 'OPTIONS':
@@ -16,6 +17,7 @@ def before_request():
         g.user = User.query.get(get_jwt_identity())
 
 
+# Route to get all todo lists for the authenticated user
 @todos_bp.route('/lists', methods=['GET'])
 @jwt_required()
 def get_lists():
@@ -23,6 +25,7 @@ def get_lists():
     return jsonify([list.to_dict() for list in lists])
 
 
+# Route to create a new todo list for the authenticated user
 @todos_bp.route('/lists', methods=['POST'])
 @jwt_required()
 def create_list():
@@ -33,6 +36,7 @@ def create_list():
     return jsonify(list.to_dict()), 201
 
 
+# Route to get a specific todo list by ID
 @todos_bp.route('/lists/<int:list_id>', methods=['GET'])
 @jwt_required()
 def get_list(list_id):
@@ -42,6 +46,7 @@ def get_list(list_id):
     return jsonify(list.to_dict())
 
 
+# Route to update a specific todo list by ID
 @todos_bp.route('/lists/<int:list_id>', methods=['PUT'])
 @jwt_required()
 def update_list(list_id):
@@ -55,6 +60,7 @@ def update_list(list_id):
     return jsonify(list.to_dict())
 
 
+# Route to delete a specific todo list by ID
 @todos_bp.route('/lists/<int:list_id>', methods=['DELETE'])
 @jwt_required()
 def delete_list(list_id):
@@ -66,6 +72,7 @@ def delete_list(list_id):
     return jsonify({'message': 'List deleted'}), 204
 
 
+# Route to update a specific todo item by ID
 @todos_bp.route('/items/<int:item_id>', methods=['PATCH'])
 @jwt_required()
 def update_item(item_id):
@@ -83,11 +90,11 @@ def update_item(item_id):
     if 'description' in data:
         item.description = data['description']
 
-
     db.session.commit()
     return jsonify(item.to_dict()), 200
 
 
+# Route to delete a specific todo item by ID
 @todos_bp.route('/items/<int:item_id>', methods=['DELETE', 'OPTIONS'])
 @jwt_required()
 @cross_origin()
@@ -99,6 +106,8 @@ def delete_item(item_id):
     db.session.commit()
     return jsonify({'message': 'Item deleted'}), 204
 
+
+# Route to get all items in a specific todo list by list ID
 @todos_bp.route('/lists/<int:list_id>/items', methods=['GET'])
 @jwt_required()
 def get_list_items(list_id):
@@ -109,6 +118,7 @@ def get_list_items(list_id):
     return jsonify([i.to_dict() for i in items])
 
 
+# Route to create a new item in a specific todo list by list ID
 @todos_bp.route('/lists/<int:list_id>/items', methods=['POST'])
 @jwt_required()
 def create_item(list_id):
@@ -122,6 +132,7 @@ def create_item(list_id):
     return jsonify(item.to_dict()), 201
 
 
+# Route to create a subitem under a specific item by item ID
 @todos_bp.route('/items/<int:item_id>/subitems', methods=['POST'])
 @jwt_required()
 def create_subitem(item_id):
@@ -140,6 +151,7 @@ def create_subitem(item_id):
     return jsonify(subitem.to_dict()), 201
 
 
+# Route to move a specific item to a different list by item ID
 @todos_bp.route('/items/<int:item_id>/move', methods=['POST'])
 @jwt_required()
 def move_item(item_id):

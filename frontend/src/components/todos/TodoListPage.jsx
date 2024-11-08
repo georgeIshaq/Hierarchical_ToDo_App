@@ -1,21 +1,22 @@
-// frontend/src/components/todos/TodoListPage.jsx
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import todoService from '../../services/todoService';
 
 const TodoListPage = () => {
-  const [lists, setLists] = useState([]);
-  const [list, setList] = useState({ items: [] });
-  const [newItemTitle, setNewItemTitle] = useState('');
+  // State variables
+  const [lists, setLists] = useState([]); // All todo lists
+  const [list, setList] = useState({ items: [] }); // Current todo list
+  const [newItemTitle, setNewItemTitle] = useState(''); // New item title input
   const [expandedItems, setExpandedItems] = useState({}); // State to track expanded items
-  const { listId } = useParams();
-  const navigate = useNavigate();
+  const { listId } = useParams(); // Get listId from URL parameters
+  const navigate = useNavigate(); // Navigation hook
 
+  // Fetch all lists on component mount
   useEffect(() => {
     fetchLists();
   }, []);
 
+  // Fetch all todo lists
   const fetchLists = async () => {
     try {
       const data = await todoService.getLists();
@@ -25,11 +26,13 @@ const TodoListPage = () => {
     }
   };
 
+  // Fetch the current list whenever listId changes
   useEffect(() => {
     fetchList();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listId]);
 
+  // Fetch a specific todo list by ID
   const fetchList = async () => {
     try {
       const data = await todoService.getList(listId);
@@ -46,6 +49,7 @@ const TodoListPage = () => {
     }
   };
 
+  // Toggle the expanded state of an item
   const toggleExpand = (itemId) => {
     setExpandedItems((prevState) => ({
       ...prevState,
@@ -53,6 +57,7 @@ const TodoListPage = () => {
     }));
   };
 
+  // Create a new item in the current list
   const createItem = async () => {
     if (!newItemTitle.trim()) return;
     try {
@@ -67,6 +72,7 @@ const TodoListPage = () => {
     }
   };
 
+  // Create a sub-item under a specific item
   const createSubItem = async (parentId) => {
     const title = prompt('Enter sub-item title:');
     if (title && title.trim()) {
@@ -79,6 +85,7 @@ const TodoListPage = () => {
     }
   };
 
+  // Delete a specific item by ID
   const deleteItem = async (itemId) => {
     try {
       await todoService.deleteItem(itemId);
@@ -88,6 +95,7 @@ const TodoListPage = () => {
     }
   };
 
+  // Toggle the completion status of an item
   const toggleItemCompletion = async (itemId, completed) => {
     try {
       await todoService.toggleItemCompletion(itemId, completed);
@@ -97,6 +105,7 @@ const TodoListPage = () => {
     }
   };
 
+  // Move an item to a different list
   const moveItem = async (itemId, newListId) => {
     try {
       await todoService.moveItem(itemId, newListId);
@@ -106,10 +115,12 @@ const TodoListPage = () => {
     }
   };
 
+  // Navigate back to the list of all todo lists
   const navigateToList = () => {
     navigate('/lists');
   };
 
+  // Show loading state if the list is not yet loaded
   if (!list) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">

@@ -1,5 +1,3 @@
-// frontend/src/components/todos/TodoListsPage.jsx
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -7,16 +5,18 @@ import todoService from '../../services/todoService';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 const TodoListsPage = () => {
-  const [lists, setLists] = useState([]);
-  const [newListTitle, setNewListTitle] = useState('');
-  const { user } = useAuth();
-  const navigate = useNavigate();
+  const [lists, setLists] = useState([]); // State to store all todo lists
+  const [newListTitle, setNewListTitle] = useState(''); // State to store new list title input
+  const { user } = useAuth(); // Get the authenticated user
+  const navigate = useNavigate(); // Navigation hook
   const [expandedItems, setExpandedItems] = useState({}); // Track expanded items
 
+  // Fetch all lists on component mount
   useEffect(() => {
     fetchLists();
   }, []);
 
+  // Fetch all todo lists
   const fetchLists = async () => {
     try {
       const data = await todoService.getLists();
@@ -27,6 +27,7 @@ const TodoListsPage = () => {
     }
   };
 
+  // Create a new todo list
   const createList = async () => {
     if (!newListTitle.trim()) return;
     try {
@@ -38,6 +39,7 @@ const TodoListsPage = () => {
     }
   };
 
+  // Delete a specific todo list by ID
   const deleteList = async (listId) => {
     try {
       await todoService.deleteList(listId);
@@ -47,10 +49,12 @@ const TodoListsPage = () => {
     }
   };
 
+  // Navigate to a specific todo list by ID
   const navigateToList = (listId) => {
     navigate(`/lists/${listId}`);
   };
 
+  // Toggle the expanded state of an item
   const toggleExpandItem = (itemId) => {
     setExpandedItems((prev) => ({
       ...prev,
@@ -58,6 +62,7 @@ const TodoListsPage = () => {
     }));
   };
 
+  // Handle drag and drop functionality
   const onDragEnd = async (result) => {
     const { source, destination, draggableId } = result;
 
@@ -313,7 +318,6 @@ const RenderTasks = ({ items, listId, depth }) => {
           </Draggable>
         );
       })}
-     
     </ul>
   );
 };

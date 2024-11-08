@@ -27,9 +27,11 @@ A hierarchical todo list application built with Flask for the backend and React 
   - [Flask-JWT-Extended](https://flask-jwt-extended.readthedocs.io/) - JWT authentication for Flask.
   - [Flask-CORS](https://flask-cors.readthedocs.io/) - Handling Cross-Origin Resource Sharing (CORS).
 
+**important note**: In the project backend you may find currently unused routes. This is because when I first set up the backend I thought I had enough time to implement some of the extra features with those routes but I ran out of time by the assignment submission deadline.
+
+## [Video](https://www.loom.com/share/b28455a97ed54b15bceeb085d548f88c?sid=6824e7f8-2d0c-4c70-a955-9858c5b7ab50)
+
 ## Project Structure
-
-
 
 ## Installation
 
@@ -41,11 +43,11 @@ A hierarchical todo list application built with Flask for the backend and React 
 
 ### Backend Setup
 
-1. **Clone the Repository**
+1. **Clone the Repository (Not Necessary if you have files locally)**
 
    ```bash
    git clone https://github.com/georgeIshaq/Hierarchical_ToDo_App.git
-   cd Hierarchical_ToDo_App/backend
+   cd backend
 
 2. **Create a Virtual Environment**
     ```bash
@@ -56,28 +58,22 @@ A hierarchical todo list application built with Flask for the backend and React 
     ```bash
     pip install -r requirements.txt
 
-4. **Set Environment Variables**
+4. **Set Environment Variables in .env**
     ```bash
     FLASK_APP=app.py
     FLASK_ENV=development
     DATABASE_URL=sqlite:///db.sqlite3
 
-5. **Run Database Migrations**
-    ```bash
-    flask db init
-    flask db migrate
-    flask db upgrade
-
-6. **Start the Backend Server**
+5. **Start the Backend Server**
     ```bash
     python run.py
 
-7. **Navigate to Frontend Directory**
+6. **Navigate to Frontend Directory**
     ```bash
-    cd ..
+    new terminal
     cd frontend
     
-8. **Install Dependencies**
+7. **Install Dependencies**
     ```bash
     npm install
 
